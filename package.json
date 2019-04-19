@@ -1,0 +1,13 @@
+{
+    "name": "kcapp-smartboard",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "start": "node main"
+    },
+    "dependencies": {
+        "debug": "^4.1.1",
+        "noble": "^1.9.1",
+        "kcapp-sio-client": "github:kcapp/kcapp-sio-client"
+    }
+}
