@@ -1,5 +1,5 @@
 var debug = require('debug')('kcapp-smartboard:main');
-var smartboard = require('./smartboard-mock')("5cf8218da78e", 15);
+var smartboard = require('./smartboard')("5cf8218da78e", 15);
 
 this.connected = false;
 this.peripheral = {};
@@ -53,7 +53,7 @@ function connectToMatch(data) {
 
                             if (player.current_score === 0 && dart.multiplier === 2) {
                                 debug("Player Checkout! sending visit");
-                                leg.emitVisit();
+				leg.emit('announce', { type: 'confirm_checkout', message: "" });
                             } else if (player.current_score <= 1) {
                                 debug("Player busted, sending visit");
                                 leg.emitVisit();
@@ -78,7 +78,7 @@ function connectToMatch(data) {
 }
 
 
-var kcapp = require('kcapp-sio-client/kcapp')("localhost", 3000);
+var kcapp = require('kcapp-sio-client/kcapp')("10.12.141.230", 3000);
 kcapp.connect(() => {
     kcapp.on('new_match', (data) => {
         connectToMatch(data);

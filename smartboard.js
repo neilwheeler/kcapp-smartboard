@@ -14,8 +14,8 @@ const CHARACTERISTIC_THROW_NOTIFICATIONS = "fff1";
  * Shift the given number depending on board rotation
  * @param {int} num - Number reported by board
  */
-function shift(num) {
-  var index = BOARD.indexOf(num) + BOARD.indexOf(this.buttonNumber);
+function shift(num, button) {
+  var index = BOARD.indexOf(num) + BOARD.indexOf(button);
   if (index > BOARD.length) {
       index = index - BOARD.length;
   }
@@ -97,11 +97,12 @@ exports.initialize = (peripheral, throwCallback, playerChangeCallback) => {
         });
 
         throwNotifyCharacteristic.on('data', (data, isNotification) => {
+	  var rawValue = data.readUInt8(0);
           var dart = {
-            score: shift(data.readUInt8(0)),
+            score: shift(rawValue, this.buttonNumber),
             multiplier: data.readUInt8(1)
           };
-          if (dart.multiplier == 170 && dart.score == 85) {
+          if (dart.multiplier == 170 && rawValue == 85) {
             playerChangeCallback();
           } else {
             throwCallback(dart);
