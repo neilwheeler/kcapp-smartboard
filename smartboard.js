@@ -10,11 +10,16 @@ const CHARACTERISTIC_BUTTON = "fff2";
 /** Characteristic to subscribe to throw notifications */
 const CHARACTERISTIC_THROW_NOTIFICATIONS = "fff1";
 
-/** 
+/**
  * Shift the given number depending on board rotation
  * @param {int} num - Number reported by board
+ * @param {int} button - Number closes to smartboard button
  */
 function shift(num, button) {
+  if (num == 25) {
+    // No need to shift bull
+    return num;
+  }
   var index = BOARD.indexOf(num) + BOARD.indexOf(button);
   if (index > BOARD.length) {
       index = index - BOARD.length;
@@ -53,7 +58,7 @@ exports.connect = (callback) => {
 /**
  * Initialize the dart board, by setting up notification listeners
  * for darts thrown, and button presses
- * 
+ *
  * @param {object} - Peripheral object to initialize
  * @param {function} - Callback when dart is thrown
  * @param {function} - Callback when button is pressed

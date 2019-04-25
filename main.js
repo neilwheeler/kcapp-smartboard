@@ -6,8 +6,6 @@ this.peripheral = {};
 
 // TODO Get battery status
 // TODO Add notification of board low power
-// TODO Cleanup code
-// TODO Add disconnect on interrupt
 
 function disconnectListener(data) {
     debug(`Got leg_finished event!`);
@@ -20,7 +18,7 @@ function disconnectListener(data) {
          });
     } else {
         debug("Leg is finished");
-    }    
+    }
 }
 
 function connectToMatch(data) {
@@ -53,7 +51,7 @@ function connectToMatch(data) {
 
                             if (player.current_score === 0 && dart.multiplier === 2) {
                                 debug("Player Checkout! sending visit");
-				leg.emit('announce', { type: 'confirm_checkout', message: "" });
+                                leg.emit('announce', { type: 'confirm_checkout', message: "" });
                             } else if (player.current_score <= 1) {
                                 debug("Player busted, sending visit");
                                 leg.emitVisit();
@@ -85,5 +83,5 @@ kcapp.connect(() => {
     });
     kcapp.on('warmup_started', (data) => {
         connectToMatch(data);
-    });    
+    });
 });
