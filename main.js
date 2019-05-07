@@ -24,7 +24,7 @@ function disconnectListener(data) {
 function connectToMatch(data) {
     var match = data.match;
     var legId = match.current_leg_id;
-    if (match.venue.id === kcapp.DART_REIDAR_VENUE_ID) {
+    if (match.venue && match.venue.id === kcapp.DART_REIDAR_VENUE_ID) {
         debug(`Connected to match ${match.id}`);
         // TODO add a generic "venue_configuration" to avoid hardcoding this here
 
