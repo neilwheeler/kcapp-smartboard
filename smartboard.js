@@ -21,7 +21,7 @@ function shift(num, button) {
     return num;
   }
   var index = BOARD.indexOf(num) + BOARD.indexOf(button);
-  if (index > BOARD.length) {
+  if (index >= BOARD.length) {
       index = index - BOARD.length;
   }
   return BOARD[index];
