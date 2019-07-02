@@ -8,17 +8,10 @@ this.peripheral = {};
 // TODO Add notification of board low power
 
 function disconnectListener(data) {
-    debug(`Got leg_finished event!`);
-    var match = data.match;
-    if (match.is_finished) {
-        debug("Match is finished, disconnecting from board");
-        smartboard.disconnect(this.peripheral, () => {
-            debug("Disconnected");
-            this.connected = false;
-         });
-    } else {
-        debug("Leg is finished");
-    }
+    smartboard.disconnect(this.peripheral, () => {
+        debug("Disconnected");
+        this.connected = false;
+    });
 }
 
 function connectToMatch(data) {
@@ -64,8 +57,22 @@ function connectToMatch(data) {
                             leg.emitVisit();
                         }
                     );
-                    leg.on('leg_finished', disconnectListener.bind(this));
+                    leg.on('leg_finished', (data) => {
+                        debug(`Got leg_finished event!`);
+                        var match = data.match;
+                        if (match.is_finished) {
+                            debug("Match is finished, disconnecting from board");
+                            disconnectListener.bind(this)(data);
+                        } else {
+                            debug("Leg is finished");
+                        }
+                    });
                     leg.emit('announce', { type: 'success', message: 'Connected to smartboard' });
+
+                    leg.on('cancelled', (data) => {
+                        debug("Leg cancelled, disconnecting from board");
+                        disconnectListener.bind(this)();
+                    });
                 });
             } else {
                 debug("Already connected to board...");
