@@ -33,7 +33,8 @@ var dart = {
   multiplier: int
 };
 ```
-`score` wil be the value of the field, while `mulitplier` will be one the following
+`score` wil be the value of the field, correctly shifted to account for board rotation
+`mulitplier` will be one the following
 ```
 0 - single (thin)
 1 - single (fat)
