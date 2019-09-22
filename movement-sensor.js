@@ -8,17 +8,30 @@ var gpio = require('rpi-gpio');
  */
 exports.initialize = (callback, bouncetime = 200) => {
     this.callback = callback;
-    gpio.on('change', (pin, value) => {
-        var last = Date.now() - last;
+    var changeFunc = (pin, value) => {
+        var last = Date.now() - this.last_motion;
         if (value && last > bouncetime) {
             debug("Movement Detected!");
             this.callback();
         }
         this.last_motion = Date.now();
-    });
-    debug(`Registering change callback on pin ${this.pin}`);
+    };
+    gpio.on('change', changeFunc);
+    this.changeFunc = changeFunc
+
+    debug('Registered movement callback');
     gpio.setup(this.pin, gpio.DIR_IN, gpio.EDGE_RISING);
 };
+
+/**
+ * Remove the listener function
+ */
+exports.teardown = () => {
+    if (this.changeFunc) {
+        debug("Removing listener");
+        gpio.removeListener('çhange', this.changeFunc);
+    }
+}
 
 /**
  * Configure the movement sensor module
@@ -26,6 +39,7 @@ exports.initialize = (callback, bouncetime = 200) => {
  */
 module.exports = (pin) => {
     this.pin = pin;
-    this.last_motion = Date.now();
+    this.last_motion = 0;
+    debug(`Movement Sensor configured on pin ${this.pin}`);
     return this;
 };

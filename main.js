@@ -1,12 +1,14 @@
 var debug = require('debug')('kcapp-smartboard:main');
 var smartboard = require('./smartboard')("5cf8218da78e", 15);
+var sensor = require('./movement-sensor')(40);
 
 this.connected = false;
 this.peripheral = {};
 
-// TODO Get battery status
-// TODO Add notification of board low power
-
+/**
+ * Disconnect from the smartboard
+ * @param {object} data
+ */
 function disconnectListener(data) {
     smartboard.disconnect(this.peripheral, () => {
         debug("Disconnected");
@@ -29,8 +31,11 @@ function connectToMatch(data) {
                 smartboard.connect((peripheral) => {
                     this.connected = true;
                     this.peripheral = peripheral;
+
+                    var lastBoardData = 0;
                     smartboard.initialize(peripheral,
                         (dart) => {
+                            lastBoardData = Date.now();
                             var player = leg.currentPlayer;
                             if (dart.multiplier == 0) {
                                 dart.multiplier = 1;
@@ -54,9 +59,20 @@ function connectToMatch(data) {
                         },
                         () => {
                             debug("Button pressed, sending visit");
+                            lastBoardData = Date.now();
                             leg.emitVisit();
                         }
                     );
+
+                    sensor.initialize(() => {
+                        var last = Date.now() - lastBoardData;
+                        debug(`Got movement. Last dart ${last}ms ago`);
+                        if (last > 200) {
+                            // TODO Send miss
+                            debug("Movement sensor: Miss");
+                        }
+                    });
+
                     leg.on('leg_finished', (data) => {
                         debug(`Got leg_finished event!`);
                         var match = data.match;
