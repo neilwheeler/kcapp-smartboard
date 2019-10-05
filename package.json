@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "private": true,
     "scripts": {
-        "start": "node main"
+        "start": "node kcapp-smartboard"
     },
     "dependencies": {
         "debug": "^4.1.1",

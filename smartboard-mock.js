@@ -26,6 +26,9 @@ exports.initialize = (peripheral, throwCallback, playerChangeCallback) => {
     debug('Connected to ' + peripheral.advertisement.localName + " (" + peripheral.uuid + ")");
     debug('Enabled listening');
     debug('Subscribed to throw noftifications!');
+    setInterval(() => {
+      throwCallback({ score: 20, multiplier: 1});
+    }, 1500);
 }
 
 exports.disconnect = (peripheral, callback) => {
