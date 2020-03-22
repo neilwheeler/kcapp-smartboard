@@ -22,7 +22,7 @@ function shift(num, button) {
   }
   var index = BOARD.indexOf(num) + BOARD.indexOf(button);
   if (index >= BOARD.length) {
-      index = index - BOARD.length;
+    index = index - BOARD.length;
   }
   return BOARD[index];
 }
@@ -42,7 +42,7 @@ exports.startScan = () => {
  * we are looking for
  *
  * @param {function} callback - Callback when dart is thrown
-  */
+ */
 exports.connect = (callback) => {
   this.discoverCallback = (peripheral) => {
     if (peripheral.uuid === this.uuid) {
@@ -102,7 +102,7 @@ exports.initialize = (peripheral, throwCallback, playerChangeCallback) => {
         });
 
         throwNotifyCharacteristic.on('data', (data, isNotification) => {
-	  var rawValue = data.readUInt8(0);
+          var rawValue = data.readUInt8(0);
           var dart = {
             score: shift(rawValue, this.buttonNumber),
             multiplier: data.readUInt8(1)
@@ -121,6 +121,8 @@ exports.initialize = (peripheral, throwCallback, playerChangeCallback) => {
 
 /**
  * Disconnect from the connected peripheral
+ * @param {object} - Connected peripheral
+ * @param {function} - Callback onces disconnected
  */
 exports.disconnect = (peripheral, callback) => {
   debug(`Removing 'discover' callback`);
@@ -153,6 +155,32 @@ exports.disconnect = (peripheral, callback) => {
   }
 }
 
+/**
+ * Subscribe to battery level changes
+ * @param {function} - Callback when battery level changes
+ */
+exports.subscribeToBatteryLevel = (changeCallback) => {
+  this.peripheral.discoverServices(['180f'], (error, services) => {
+    services[0].discoverCharacteristics(['2a19'], (error, characteristics) => {
+      if (error) {
+        debug(`ERROR: ${error}`);
+      }
+      var batteryLevelCharacteristic = characteristics[0];
+      batteryLevelCharacteristic.on('data', (data, isNotification) => {
+        var level = data.readUInt8(0);
+        debug(`Battery level is ${level}%`);
+        changeCallback(level);
+      });
+      batteryLevelCharacteristic.subscribe((error) => {
+        if (error) {
+          debug(`ERROR: ${error}`);
+        }
+        debug(`Subscribed to battery level notifications`);
+      });
+    });
+  });
+}
+
 function interrupt() {
   debug(this.peripheral);
   if (this.peripheral) {
@@ -163,7 +191,9 @@ function interrupt() {
     });
 
     // Give the board 3 seconds to disconnect before we die....
-    setTimeout(() => { process.exit(); }, 3000 );
+    setTimeout(() => {
+      process.exit();
+    }, 3000);
   } else {
     process.exit();
   }
@@ -178,6 +208,6 @@ module.exports = (uuid, buttonNumber) => {
   this.uuid = uuid;
   this.buttonNumber = buttonNumber;
 
-  process.on('SIGINT', interrupt.bind(this) );
+  process.on('SIGINT', interrupt.bind(this));
   return this;
 };

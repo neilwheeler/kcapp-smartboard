@@ -3,6 +3,8 @@ var smartboard = require('./smartboard')("5cf8218da78e", 15);
 //var sensor = require('./movement-sensor')(40);
 
 const SHOOTOUT = 2;
+const CRICKET = 4;
+const DARTSATX = 5;
 
 this.connected = false;
 this.peripheral = {};
@@ -55,7 +57,13 @@ function connectToMatch(data) {
                                 } else if (leg.dartsThrown == 3) {
                                     leg.emitVisit();
                                 }
-                            } else {
+                            }
+                            else if (match.match_type.id == CRICKET || match.match_type.id == DARTSATX) {
+                                if (leg.dartsThrown == 3) {
+                                    leg.emitVisit();
+                                }
+                            }
+                            else {
                                 player.current_score -= dart.score * dart.multiplier;
 
                                 if (player.current_score === 0 && dart.multiplier === 2) {

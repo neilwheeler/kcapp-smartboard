@@ -7,8 +7,8 @@
     },
     "dependencies": {
         "debug": "^4.1.1",
-        "noble": "^1.9.1",
         "kcapp-sio-client": "github:kcapp/kcapp-sio-client",
+        "noble": "^1.9.1",
         "rpi-gpio": "^2.1.4"
     }
 }

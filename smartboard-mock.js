@@ -28,7 +28,7 @@ exports.initialize = (peripheral, throwCallback, playerChangeCallback) => {
     debug('Subscribed to throw noftifications!');
     setInterval(() => {
       throwCallback({ score: 20, multiplier: 1});
-    }, 1500);
+    }, 10000);
 }
 
 exports.disconnect = (peripheral, callback) => {
