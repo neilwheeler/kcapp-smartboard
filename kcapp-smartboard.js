@@ -1,6 +1,5 @@
 var debug = require('debug')('kcapp-smartboard:main');
-var smartboard = require('./smartboard')("5cf8218da78e", 15);
-//var sensor = require('./movement-sensor')(40);
+var smartboard = require('./smartboard')();
 
 const X01 = 1;
 const SHOOTOUT = 2;
@@ -22,19 +21,20 @@ function disconnectListener(data) {
 function connectToMatch(data) {
     var match = data.match;
     var legId = match.current_leg_id;
-    if (match.venue && match.venue.config.has_smartboard) {
+    var config = match.venue.config;
+    if (match.venue && config.has_smartboard) {
         debug(`Connected to match ${match.id}`);
         kcapp.connectLegNamespace(legId, (leg) => {
             debug(`Connected to leg ${legId}`);
             if (!this.connected) {
                 leg.emit('announce', { type: 'notify', message: 'Searching for smartboard ...' });
                 smartboard.startScan();
-                smartboard.connect((peripheral) => {
+                smartboard.connect(config.smartboard_uuid, (peripheral) => {
                     this.connected = true;
                     this.peripheral = peripheral;
 
                     var lastBoardData = 0;
-                    smartboard.initialize(peripheral,
+                    smartboard.initialize(peripheral, config.smartboard_button_number,
                         (dart) => {
                             lastBoardData = Date.now();
                             var player = leg.currentPlayer;
@@ -82,15 +82,6 @@ function connectToMatch(data) {
                         }
                     );
 
-                    /*sensor.initialize(() => {
-                        var last = Date.now() - lastBoardData;
-                        debug(`Got movement. Last dart ${last}ms ago`);
-                        if (last > 200) {
-                            // TODO Send miss
-                            debug("Movement sensor: Miss");
-                        }
-                    });*/
-
                     leg.on('leg_finished', (data) => {
                         debug(`Got leg_finished event!`);
                         var match = data.match;
@@ -110,19 +101,25 @@ function connectToMatch(data) {
                 });
             } else {
                 debug("Already connected to board...");
+                leg.emit('announce', { type: 'success', message: 'Already Connected' });
                 leg.on('leg_finished', disconnectListener.bind(this));
             }
         });
     }
 }
+var host = process.env.KCAPP_API || "localhost";
+var port = process.env.PORT || 3000;
+debug(`Connecting to kcapp on ${host}:${port}`);
 
-
-var kcapp = require('kcapp-sio-client/kcapp')("localhost", 3000);
+var kcapp = require('kcapp-sio-client/kcapp')(host, port, 'smartboard');
 kcapp.connect(() => {
     kcapp.on('new_match', (data) => {
         connectToMatch(data);
     });
     kcapp.on('warmup_started', (data) => {
+        connectToMatch(data);
+    });
+    kcapp.on('reconnect_smartboard', (data) => {
         connectToMatch(data);
     });
 });

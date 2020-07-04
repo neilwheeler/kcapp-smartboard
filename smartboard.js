@@ -17,8 +17,7 @@ const CHARACTERISTIC_THROW_NOTIFICATIONS = "fff1";
  */
 function shift(num, button) {
   if (num == 25) {
-    // No need to shift bull
-    return num;
+    return num; // No need to shift Bullseye
   }
   var index = BOARD.indexOf(num) + BOARD.indexOf(button);
   if (index >= BOARD.length) {
@@ -41,11 +40,12 @@ exports.startScan = () => {
  * and check all peripherals found until it finds one matching the UUID
  * we are looking for
  *
+ * @param {string} uuid - UUID of smartboard to connect to
  * @param {function} callback - Callback when dart is thrown
  */
-exports.connect = (callback) => {
+exports.connect = (uuid, callback) => {
   this.discoverCallback = (peripheral) => {
-    if (peripheral.uuid === this.uuid) {
+    if (peripheral.uuid === uuid) {
       callback(peripheral);
       debug("Found device, stopped scanning");
       noble.stopScanning();
@@ -60,10 +60,11 @@ exports.connect = (callback) => {
  * for darts thrown, and button presses
  *
  * @param {object} - Peripheral object to initialize
+ * @param {int} - Number next to the board button
  * @param {function} - Callback when dart is thrown
  * @param {function} - Callback when button is pressed
  */
-exports.initialize = (peripheral, throwCallback, playerChangeCallback) => {
+exports.initialize = (peripheral, buttonNumber, throwCallback, playerChangeCallback) => {
   peripheral.connect((error) => {
     if (error) {
       debug("ERROR: " + error);
@@ -104,7 +105,7 @@ exports.initialize = (peripheral, throwCallback, playerChangeCallback) => {
         throwNotifyCharacteristic.on('data', (data, isNotification) => {
           var rawValue = data.readUInt8(0);
           var dart = {
-            score: shift(rawValue, this.buttonNumber),
+            score: shift(rawValue, buttonNumber),
             multiplier: data.readUInt8(1)
           };
           if (dart.multiplier == 170 && rawValue == 85) {
@@ -182,7 +183,6 @@ exports.subscribeToBatteryLevel = (changeCallback) => {
 }
 
 function interrupt() {
-  debug(this.peripheral);
   if (this.peripheral) {
     debug("Caught interrupt signal, Disconnecting...");
 
@@ -201,13 +201,8 @@ function interrupt() {
 
 /**
  * Configure the smartboard module
- * @param {string} uuid - UUID of smartboard
- * @param {int} buttonNumber - Number the button is closest to
  */
-module.exports = (uuid, buttonNumber) => {
-  this.uuid = uuid;
-  this.buttonNumber = buttonNumber;
-
+module.exports = () => {
   process.on('SIGINT', interrupt.bind(this));
   return this;
 };

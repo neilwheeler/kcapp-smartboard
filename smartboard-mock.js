@@ -11,24 +11,24 @@ exports.startScan = () => {
   debug("Started scanning")
 }
 
-exports.connect = (callback) => {
+exports.connect = (uuid, callback) => {
   this.discoverCallback = (peripheral) => {
-    if (peripheral.uuid === this.uuid) {
+    if (peripheral.uuid === uuid) {
       callback(peripheral);
       debug("Found device, stopped scanning");
       this.peripheral = peripheral;
     }
   };
-  this.discoverCallback({ uuid: this.uuid, advertisement: { localName: 'joofunn Dartboard'   }} );
+  this.discoverCallback({ uuid: uuid, advertisement: { localName: 'joofunn Dartboard' }} );
 }
 
-exports.initialize = (peripheral, throwCallback, playerChangeCallback) => {
+exports.initialize = (peripheral, buttonNumber, throwCallback, playerChangeCallback) => {
     debug('Connected to ' + peripheral.advertisement.localName + " (" + peripheral.uuid + ")");
     debug('Enabled listening');
     debug('Subscribed to throw noftifications!');
     setInterval(() => {
-      throwCallback({ score: 20, multiplier: 1});
-    }, 10000);
+      throwCallback({ score: 20, multiplier: 2});
+    }, 5000);
 }
 
 exports.disconnect = (peripheral, callback) => {
@@ -41,10 +41,7 @@ exports.disconnect = (peripheral, callback) => {
 
 /**
  * Configure the smartboard module
- * @param {string} uuid - UUID of smartboard
  */
-module.exports = (uuid, buttonNumber) => {
-  this.uuid = uuid;
-  this.buttonNumber = buttonNumber;
+module.exports = () => {
   return this;
 };
