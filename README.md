@@ -8,13 +8,14 @@ For detailed information and usage, see the [Wiki](https://github.com/kcapp/smar
 
 ### Connect
 ```javascript
-var smartboard = require('./smartboard')("<smartboard uuid>", <button number>);
+var smartboard = require('./smartboard')();
 
 // Start scanning for the board
 smartboard.startScan();
 // Register a connect callback, which will be called once board has been found, and connection has been established
-smartboard.connect((peripheral) => {
-    smartboard.initialize(peripheral,
+smartboard.connect(board-uuid, (peripheral) => {
+    // Initialize the board and register callbacks
+    smartboard.initialize(peripheral, config.smartboard_button_number,
         (dart) => {
             // Dart throw callback
         },
