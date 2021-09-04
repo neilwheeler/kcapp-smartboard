@@ -1,5 +1,8 @@
-var debug = require('debug')('kcapp-smartboard:main');
-var smartboard = require('./smartboard')();
+const debug = require('debug')('kcapp-smartboard:main');
+const smartboard = process.env.NODE_ENV === "prod" ? require('./smartboard')() : require("./smartboard-mock")();
+const host = process.env.KCAPP_API || "localhost";
+const port = process.env.PORT || 3000;
+const kcapp = require('kcapp-sio-client/kcapp')(host, port, 'smartboard', "http");
 
 const X01 = 1;
 const SHOOTOUT = 2;
@@ -19,9 +22,9 @@ function disconnectListener(data) {
 }
 
 function connectToMatch(data) {
-    var match = data.match;
-    var legId = match.current_leg_id;
-    var config = match.venue.config;
+    const match = data.match;
+    const legId = match.current_leg_id;
+    const config = match.venue.config;
     if (match.venue && config.has_smartboard) {
         debug(`Connected to match ${match.id}`);
         kcapp.connectLegNamespace(legId, (leg) => {
@@ -33,11 +36,9 @@ function connectToMatch(data) {
                     this.connected = true;
                     this.peripheral = peripheral;
 
-                    var lastBoardData = 0;
                     smartboard.initialize(peripheral, config.smartboard_button_number,
                         (dart) => {
-                            lastBoardData = Date.now();
-                            var player = leg.currentPlayer;
+                            const player = leg.currentPlayer;
                             if (dart.multiplier == 0) {
                                 dart.multiplier = 1;
                                 dart.zone = 'inner';
@@ -49,7 +50,7 @@ function connectToMatch(data) {
 
                             if (match.match_type.id == SHOOTOUT) {
                                 player.current_score += dart.score * dart.multiplier;
-                                var visits = leg.leg.visits.length;
+                                const visits = leg.leg.visits.length;
                                 if (visits > 0 && ((visits * 3 + leg.dartsThrown) % (9 * leg.leg.players.length) === 0)) {
                                     debug("Match finished! sending visit");
                                     leg.emitVisit();
@@ -77,14 +78,13 @@ function connectToMatch(data) {
                         },
                         () => {
                             debug("Button pressed, sending visit");
-                            lastBoardData = Date.now();
                             leg.emitVisit();
                         }
                     );
 
                     leg.on('leg_finished', (data) => {
                         debug(`Got leg_finished event!`);
-                        var match = data.match;
+                        const match = data.match;
                         if (match.is_finished) {
                             debug("Match is finished, disconnecting from board");
                             disconnectListener.bind(this)(data);
@@ -107,11 +107,7 @@ function connectToMatch(data) {
         });
     }
 }
-var host = process.env.KCAPP_API || "localhost";
-var port = process.env.PORT || 3000;
-debug(`Connecting to kcapp on ${host}:${port}`);
 
-var kcapp = require('kcapp-sio-client/kcapp')(host, port, 'smartboard');
 kcapp.connect(() => {
     kcapp.on('new_match', (data) => {
         connectToMatch(data);
@@ -123,3 +119,4 @@ kcapp.connect(() => {
         connectToMatch(data);
     });
 });
+debug("Waiting for matches to start...");

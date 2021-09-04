@@ -67,27 +67,27 @@ exports.connect = (uuid, callback) => {
 exports.initialize = (peripheral, buttonNumber, throwCallback, playerChangeCallback) => {
   peripheral.connect((error) => {
     if (error) {
-      debug("ERROR: " + error);
+      debug(`ERROR: ${error}`);
     }
-    debug('Connected to ' + peripheral.advertisement.localName + " (" + peripheral.uuid + ")");
+    debug(`Connected to ${peripheral.advertisement.localName} (${peripheral.uuid})`);
 
     // Get the scoring service
     peripheral.discoverServices([SERVICE_SCORING], (error, services) => {
       if (error) {
-        debug("ERROR: " + error);
+        debug(`ERROR: ${error}`);
       }
 
       var scoringService = services[0];
       scoringService.discoverCharacteristics([CHARACTERISTIC_BUTTON, CHARACTERISTIC_THROW_NOTIFICATIONS], (error, characteristics) => {
         if (error) {
-          debug("ERROR: " + error);
+          debug(`ERROR: ${error}`);
         }
 
         // To enable listening for notifications, we first need to set the button as high (0x03)
         var buttonCharacteristic = characteristics[1];
         buttonCharacteristic.write(new Buffer([0x03]), true, (error) => {
           if (error) {
-            debug("ERROR: " + error);
+            debug(`ERROR: ${error}`);
           }
           debug('Enabled listening');
         });
@@ -97,7 +97,7 @@ exports.initialize = (peripheral, buttonNumber, throwCallback, playerChangeCallb
         var throwNotifyCharacteristic = characteristics[0];
         throwNotifyCharacteristic.subscribe((error) => {
           if (error) {
-            debug("ERROR: " + error);
+            debug(`ERROR: ${error}`);
           }
           debug('Subscribed to throw noftifications!');
         });
@@ -145,9 +145,9 @@ exports.disconnect = (peripheral, callback) => {
       debug(`Disabled listening on characteristic ${CHARACTERISTIC_BUTTON}`);
       peripheral.disconnect((error) => {
         if (error) {
-          debug("Error " + error);
+          debug(`ERROR: ${error}`);
         }
-        debug('Disconnected from ' + peripheral.advertisement.localName);
+        debug(`Disconnected from ${peripheral.advertisement.localName}`);
         if (callback) {
           callback();
         }
