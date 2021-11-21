@@ -2,13 +2,12 @@
 # smartboard
 Integration of [Unicorn Smartboard](https://www.unicornsmartboard.com/smartboard.html) into kcapp
 
-
 ## Usage
 For detailed information and usage, see the [Wiki](https://github.com/kcapp/smartboard/wiki)
 
 ### Connect
 ```javascript
-var smartboard = require('./smartboard')();
+const smartboard = require('./smartboard')();
 
 // Start scanning for the board
 smartboard.startScan();
@@ -29,7 +28,7 @@ smartboard.connect(board-uuid, (peripheral) => {
 #### Values
 `dart` object returned contains the following
 ```javascript
-var dart = {
+const dart = {
   score: int ,
   multiplier: int
 };
