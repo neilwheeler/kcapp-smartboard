@@ -47,6 +47,5 @@ var dart = {
 ```javascript
 smartboard.disconnect(peripheral, () => {
     // Disconnected
- });
+});
 ```
-
